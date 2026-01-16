@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+  import React, { useState, useEffect, useCallback } from 'react';
 
 // === STORAGE POLYFILL (for local development) ===
 if (!window.storage) {
@@ -88,9 +88,9 @@ const Notification = ({ message, type, onClose }) => {
 
   return (
     <div className={`fixed top-4 right-4 ${bgColor} text-white px-4 py-3 rounded-xl shadow-lg z-50 flex items-center gap-2 animate-pulse`}>
-      <span>{type === 'success' ? 'âœ“' : type === 'error' ? 'âœ•' : type === 'warning' ? 'âš ' : 'â„¹'}</span>
+      <span>{type === 'success' ? '✔' : type === 'error' ? '✕' : type === 'warning' ? '⚠' : 'ℹ'}</span>
       <span>{message}</span>
-      <button onClick={onClose} className="ml-2 hover:opacity-70">âœ•</button>
+      <button onClick={onClose} className="ml-2 hover:opacity-70">✕</button>
     </div>
   );
 };
@@ -115,25 +115,25 @@ class ErrorBoundary extends React.Component {
       return (
         <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center p-4">
           <div className="bg-slate-800 rounded-2xl p-6 max-w-md text-center">
-            <p className="text-4xl mb-4">ðŸ˜¢</p>
-            <h2 className="text-xl font-bold text-white mb-2">Ups! CoÅ› poszÅ‚o nie tak</h2>
-            <p className="text-slate-400 mb-4">Aplikacja napotkaÅ‚a bÅ‚Ä…d. SprÃ³buj odÅ›wieÅ¼yÄ‡ stronÄ™.</p>
+            <p className="text-4xl mb-4">😢</p>
+            <h2 className="text-xl font-bold text-white mb-2">Ups! Coś poszło nie tak</h2>
+            <p className="text-slate-400 mb-4">Aplikacja napotkała błąd. Spróbuj odświeżyć stronę.</p>
             <button
               onClick={() => window.location.reload()}
               className="bg-purple-500 text-white px-6 py-2 rounded-xl hover:bg-purple-600"
             >
-              OdÅ›wieÅ¼ stronÄ™
+              Odśwież stronę
             </button>
             <button
               onClick={() => {
-                if (confirm('Czy chcesz zresetowaÄ‡ aplikacjÄ™? To usunie wszystkie dane!')) {
+                if (confirm('Czy chcesz zresetować aplikację? To usunie wszystkie dane!')) {
                   window.storage?.delete('glow-up-tracker-v2');
                   window.location.reload();
                 }
               }}
               className="block mx-auto mt-3 text-red-400 text-sm hover:text-red-300"
             >
-              Resetuj aplikacjÄ™ (ostatecznoÅ›Ä‡)
+              Resetuj aplikację (ostateczność)
             </button>
           </div>
         </div>
@@ -166,11 +166,11 @@ const initialState = {
 };
 
 const DAILY_TASKS = [
-  { key: 'exercise', icon: 'ðŸƒ', label: 'Ä†wiczenia (20 min)' },
-  { key: 'english', icon: 'ðŸ‡¬ðŸ‡§', label: 'Angielski (1h)' },
-  { key: 'codingTheory', icon: 'ðŸ“–', label: 'Coding: Teoria/Kurs (1h)' },
-  { key: 'codingPractice', icon: 'ðŸ’»', label: 'Coding: Projekt/Portfolio (1.5h)' },
-  { key: 'water', icon: 'ðŸ’§', label: 'Woda 2L' }
+  { key: 'exercise', icon: '🏃', label: 'Ćwiczenia (20 min)' },
+  { key: 'english', icon: '🇬🇧', label: 'Angielski (1h)' },
+  { key: 'codingTheory', icon: '📖', label: 'Coding: Teoria/Kurs (1h)' },
+  { key: 'codingPractice', icon: '💻', label: 'Coding: Projekt/Portfolio (1.5h)' },
+  { key: 'water', icon: '💧', label: 'Woda 2L' }
 ];
 
 const defaultSkills = [
@@ -210,12 +210,12 @@ const defaultEnglishTopics = [
   { name: 'Passive Voice', done: false },
   { name: 'Modal Verbs (advanced)', done: false },
   { name: 'Relative Clauses', done: false },
-  { name: 'Phrasal Verbs (100 najwaÅ¼niejszych)', done: false },
+  { name: 'Phrasal Verbs (100 najważniejszych)', done: false },
   { name: 'Collocations', done: false },
   { name: 'Linking words & connectors', done: false },
   { name: 'Formal vs Informal writing', done: false },
   { name: 'Reading comprehension strategies', done: false },
-  { name: 'Listening - rÃ³Å¼ne akcenty', done: false },
+  { name: 'Listening - różne akcenty', done: false },
   { name: 'Speaking - IT vocabulary', done: false },
   { name: 'Writing - emails & reports', done: false },
 ];
@@ -263,7 +263,7 @@ function GlowUpTrackerInner() {
             setState(prev => ({ 
               ...prev, 
               ...parsed,
-              // Upewnij siÄ™ Å¼e krytyczne pola istniejÄ…
+              // Upewnij się że krytyczne pola istnieją
               currentWeight: safeParseFloat(parsed.currentWeight, 72),
               dailyHistory: parsed.dailyHistory || {},
               meals: parsed.meals || {},
@@ -275,7 +275,7 @@ function GlowUpTrackerInner() {
         }
       } catch (e) {
         console.error('Error loading data:', e);
-        showNotification('Nie udaÅ‚o siÄ™ wczytaÄ‡ danych. Zaczynamy od nowa.', 'warning');
+        showNotification('Nie udało się wczytać danych. Zaczynamy od nowa.', 'warning');
       }
       setIsLoading(false);
     };
@@ -285,7 +285,7 @@ function GlowUpTrackerInner() {
   const saveState = async (newState) => {
     // Walidacja przed zapisem
     if (!newState || typeof newState !== 'object') {
-      showNotification('BÅ‚Ä…d: nieprawidÅ‚owe dane', 'error');
+      showNotification('Błąd: nieprawidłowe dane', 'error');
       return;
     }
 
@@ -298,7 +298,7 @@ function GlowUpTrackerInner() {
     } catch (e) {
       console.error('Failed to save:', e);
       setSaveStatus('error');
-      showNotification('Nie udaÅ‚o siÄ™ zapisaÄ‡ zmian!', 'error');
+      showNotification('Nie udało się zapisać zmian!', 'error');
     }
   };
 
@@ -337,11 +337,11 @@ function GlowUpTrackerInner() {
     const kcal = safeParseInt(newMeal.kcal, 0);
     
     if (!name) {
-      showNotification('Wpisz nazwÄ™ posiÅ‚ku', 'warning');
+      showNotification('Wpisz nazwę posiłku', 'warning');
       return;
     }
     if (kcal <= 0) {
-      showNotification('Wpisz poprawnÄ… liczbÄ™ kalorii', 'warning');
+      showNotification('Wpisz poprawną liczbę kalorii', 'warning');
       return;
     }
     
@@ -360,7 +360,7 @@ function GlowUpTrackerInner() {
     };
     saveState(newState);
     setNewMeal({ name: '', kcal: '', protein: '' });
-    showNotification('PosiÅ‚ek dodany! ðŸ½ï¸', 'success');
+    showNotification('Posiłek dodany! 🍽️', 'success');
   };
 
   const removeMeal = (mealId) => {
@@ -379,7 +379,7 @@ function GlowUpTrackerInner() {
     const name = (newScheduleTask.name || '').trim();
     
     if (!name) {
-      showNotification('Wpisz nazwÄ™ zadania', 'warning');
+      showNotification('Wpisz nazwę zadania', 'warning');
       return;
     }
     
@@ -401,7 +401,7 @@ function GlowUpTrackerInner() {
     };
     saveState(newState);
     setNewScheduleTask({ name: '', startTime: '17:00', endTime: '18:00', category: 'frontend' });
-    showNotification('Zadanie dodane! ðŸ“…', 'success');
+    showNotification('Zadanie dodane! 📅', 'success');
   };
 
   const toggleScheduleTask = (taskId) => {
@@ -523,14 +523,14 @@ function GlowUpTrackerInner() {
   };
 
   const resetAll = () => {
-    const confirmed = window.confirm('âš ï¸ Na pewno chcesz zresetowaÄ‡ CAÅY postÄ™p?\n\nTo usunie:\nâ€¢ Wszystkie zadania\nâ€¢ HistoriÄ™ wagi\nâ€¢ PosiÅ‚ki\nâ€¢ Notatki\nâ€¢ PostÄ™py w nauce\n\nTej operacji nie moÅ¼na cofnÄ…Ä‡!');
+    const confirmed = window.confirm('⚠️ Na pewno chcesz zresetować CAÅY postęp?\n\nTo usunie:\n• Wszystkie zadania\n• Historię wagi\n• Posiłki\n• Notatki\n• Postępy w nauce\n\nTej operacji nie można cofnąć!');
     
     if (confirmed) {
       saveState({
         ...initialState,
         startDate: getTodayKey()
       });
-      showNotification('Dane zostaÅ‚y zresetowane', 'info');
+      showNotification('Dane zostały zresetowane', 'info');
     }
   };
 
@@ -579,20 +579,20 @@ function GlowUpTrackerInner() {
   };
 
   const motivationalQuotes = [
-    "KaÅ¼dy ekspert byÅ‚ kiedyÅ› poczÄ…tkujÄ…cym. ðŸ’ª",
-    "Nie chodzi o to, by byÄ‡ najlepszÄ…. Chodzi o to, by byÄ‡ lepszÄ… niÅ¼ wczoraj.",
-    "Za 3 miesiÄ…ce podziÄ™kujesz sobie za to, Å¼e zaczÄ™Å‚aÅ› dziÅ›.",
-    "Sukces to suma maÅ‚ych wysiÅ‚kÃ³w powtarzanych kaÅ¼dego dnia.",
+    "Każdy ekspert był kiedyś początkującym. 💪",
+    "Nie chodzi o to, by być najlepszą. Chodzi o to, by być lepszą niż wczoraj.",
+    "Za 3 miesiące podziękujesz sobie za to, że zaczęłaś dziś.",
+    "Sukces to suma małych wysiłków powtarzanych każdego dnia.",
     "Twoja jedyna konkurencja to Ty z wczoraj.",
-    "MaÅ‚e kroki prowadzÄ… do wielkich zmian.",
-    "Dyscyplina to wybieranie miÄ™dzy tym, czego chcesz teraz, a tym, czego chcesz najbardziej."
+    "Małe kroki prowadzą do wielkich zmian.",
+    "Dyscyplina to wybieranie między tym, czego chcesz teraz, a tym, czego chcesz najbardziej."
   ];
 
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="text-4xl mb-4 animate-bounce">âœ¨</div>
+          <div className="text-4xl mb-4 animate-bounce">✨</div>
           <div className="text-white text-xl">Åadowanie...</div>
         </div>
       </div>
@@ -615,9 +615,9 @@ function GlowUpTrackerInner() {
         {/* Header */}
         <div className="text-center mb-6">
           <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
-            âœ¨ 3-Month Glow Up âœ¨
+            ✨ 3-Month Glow Up ✨
           </h1>
-          <p className="text-slate-400 mt-1">Frontend â€¢ English B2 â€¢ Fitness</p>
+          <p className="text-slate-400 mt-1">Frontend • English B2 • Fitness</p>
           {/* Save status indicator */}
           <div className="flex justify-center items-center gap-2 mt-2">
             <div className={`w-2 h-2 rounded-full ${
@@ -628,15 +628,9 @@ function GlowUpTrackerInner() {
             <span className="text-xs text-slate-500">
               {saveStatus === 'saved' ? 'Zapisano' :
                saveStatus === 'saving' ? 'Zapisywanie...' :
-               'BÅ‚Ä…d zapisu'}
+               'Błąd zapisu'}
             </span>
           </div>
-        </div>
-        <div className="text-center mb-6">
-          <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
-            âœ¨ 3-Month Glow Up âœ¨
-          </h1>
-          <p className="text-slate-400 mt-1">Frontend â€¢ English B2 â€¢ Fitness</p>
         </div>
 
         {/* Progress Overview */}
@@ -646,7 +640,7 @@ function GlowUpTrackerInner() {
               <span className={`${phase.color} text-xs px-2 py-1 rounded-full`}>
                 {phase.name}
               </span>
-              <h2 className="text-xl font-semibold mt-1">TydzieÅ„ {weekNumber}/12</h2>
+              <h2 className="text-xl font-semibold mt-1">Tydzień {weekNumber}/12</h2>
             </div>
             <div className="text-right">
               <p className="text-2xl font-bold">{state.currentWeight} kg</p>
@@ -686,12 +680,12 @@ function GlowUpTrackerInner() {
         {/* Tabs */}
         <div className="flex gap-2 mb-4 overflow-x-auto pb-2">
           {[
-            { id: 'today', label: 'ðŸ“… DziÅ›' },
-            { id: 'schedule', label: 'â° Plan dnia' },
-            { id: 'food', label: 'ðŸ½ï¸ PosiÅ‚ki' },
-            { id: 'history', label: 'ðŸ“Š Historia' },
-            { id: 'week', label: 'ðŸ“ˆ TydzieÅ„' },
-            { id: 'plan', label: 'ðŸ“ Cele' }
+            { id: 'today', label: '📅 Dziś' },
+            { id: 'schedule', label: '⏰ Plan dnia' },
+            { id: 'food', label: '🍽️ Posiłki' },
+            { id: 'history', label: '📊 Historia' },
+            { id: 'week', label: '📈 Tydzień' },
+            { id: 'plan', label: '📝 Cele' }
           ].map(tab => (
             <button
               key={tab.id}
@@ -712,7 +706,7 @@ function GlowUpTrackerInner() {
           <div className="space-y-3">
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
               <div className="flex justify-between items-center mb-3">
-                <h3 className="font-semibold">StaÅ‚e nawyki</h3>
+                <h3 className="font-semibold">Stałe nawyki</h3>
                 <span className="text-sm bg-slate-700 px-2 py-1 rounded-full">
                   {dailyCompleted}/{DAILY_TASKS.length}
                 </span>
@@ -739,7 +733,7 @@ function GlowUpTrackerInner() {
                       ? 'bg-green-500 border-green-500' 
                       : 'border-slate-500'
                   }`}>
-                    {todayTasks[task.key] && <span className="text-xs">âœ“</span>}
+                    {todayTasks[task.key] && <span className="text-xs">✔</span>}
                   </div>
                 </button>
               ))}
@@ -749,7 +743,7 @@ function GlowUpTrackerInner() {
             {getTodaySchedule().length > 0 && (
               <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
                 <div className="flex justify-between items-center mb-3">
-                  <h3 className="font-semibold">ðŸ“… Plan na dziÅ›</h3>
+                  <h3 className="font-semibold">📅 Plan na dziś</h3>
                   <span className="text-sm bg-slate-700 px-2 py-1 rounded-full">
                     {getTodaySchedule().filter(t => t.done).length}/{getTodaySchedule().length}
                   </span>
@@ -757,10 +751,10 @@ function GlowUpTrackerInner() {
                 
                 {getTodaySchedule().map(task => {
                   const categoryIcons = {
-                    frontend: 'ðŸ’»',
-                    english: 'ðŸ‡¬ðŸ‡§',
-                    exercise: 'ðŸƒ',
-                    other: 'ðŸ“Œ'
+                    frontend: '💻',
+                    english: '🇬🇧',
+                    exercise: '🏃',
+                    other: '📌'
                   };
                   
                   return (
@@ -785,7 +779,7 @@ function GlowUpTrackerInner() {
                           ? 'bg-green-500 border-green-500' 
                           : 'border-slate-500'
                       }`}>
-                        {task.done && <span className="text-xs">âœ“</span>}
+                        {task.done && <span className="text-xs">✔</span>}
                       </div>
                     </button>
                   );
@@ -802,22 +796,22 @@ function GlowUpTrackerInner() {
                   : ''
             }`}>
               <div className="flex items-center gap-3">
-                <span className="text-2xl">ðŸ½ï¸</span>
+                <span className="text-2xl">🍽️</span>
                 <div className="flex-1">
                   <p>Kalorie dzisiaj</p>
                   <p className="text-xs text-slate-400">cel: 1400-1500 kcal</p>
                 </div>
                 <div className="text-right">
                   <p className="text-xl font-bold">{totalKcal}</p>
-                  <p className="text-xs text-slate-400">{totalProtein}g biaÅ‚ka</p>
+                  <p className="text-xs text-slate-400">{totalProtein}g białka</p>
                 </div>
               </div>
             </div>
 
             {dailyCompleted === DAILY_TASKS.length && getTodaySchedule().every(t => t.done) && totalKcal >= 1400 && totalKcal <= 1500 && (
               <div className="bg-gradient-to-r from-green-500/20 to-emerald-500/20 border border-green-500/50 rounded-2xl p-4 text-center">
-                <p className="text-2xl mb-1">ðŸŽ‰</p>
-                <p className="font-semibold text-green-400">Perfekcyjny dzieÅ„!</p>
+                <p className="text-2xl mb-1">🎉</p>
+                <p className="font-semibold text-green-400">Perfekcyjny dzień!</p>
                 <p className="text-sm text-slate-400">Wszystko zrobione + kalorie w normie!</p>
               </div>
             )}
@@ -829,11 +823,11 @@ function GlowUpTrackerInner() {
           <div className="space-y-3">
             {/* Add meal form */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
-              <h3 className="font-semibold mb-3">âž• Dodaj posiÅ‚ek</h3>
+              <h3 className="font-semibold mb-3">➕ Dodaj posiłek</h3>
               <div className="space-y-3">
                 <input
                   type="text"
-                  placeholder="Nazwa posiÅ‚ku (np. Owsianka z owocami)"
+                  placeholder="Nazwa posiłku (np. Owsianka z owocami)"
                   value={newMeal.name}
                   onChange={(e) => setNewMeal({ ...newMeal, name: e.target.value })}
                   className="w-full bg-slate-700 rounded-xl px-4 py-3 placeholder-slate-500"
@@ -850,7 +844,7 @@ function GlowUpTrackerInner() {
                     />
                   </div>
                   <div className="flex-1">
-                    <label className="text-xs text-slate-400 mb-1 block">BiaÅ‚ko (opcjonalnie)</label>
+                    <label className="text-xs text-slate-400 mb-1 block">Białko (opcjonalnie)</label>
                     <input
                       type="number"
                       placeholder="g"
@@ -865,7 +859,7 @@ function GlowUpTrackerInner() {
                   disabled={!newMeal.name || !newMeal.kcal}
                   className="w-full bg-gradient-to-r from-purple-500 to-pink-500 py-3 rounded-xl font-semibold disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Dodaj posiÅ‚ek
+                  Dodaj posiłek
                 </button>
               </div>
             </div>
@@ -873,12 +867,12 @@ function GlowUpTrackerInner() {
             {/* Today's meals */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
               <div className="flex justify-between items-center mb-3">
-                <h3 className="font-semibold">ðŸ½ï¸ Dzisiejsze posiÅ‚ki</h3>
-                <span className="text-sm text-slate-400">{todayMeals.length} posiÅ‚kÃ³w</span>
+                <h3 className="font-semibold">🍽️ Dzisiejsze posiłki</h3>
+                <span className="text-sm text-slate-400">{todayMeals.length} posiłków</span>
               </div>
 
               {todayMeals.length === 0 ? (
-                <p className="text-slate-500 text-center py-4">Brak posiÅ‚kÃ³w - dodaj pierwszy!</p>
+                <p className="text-slate-500 text-center py-4">Brak posiłków - dodaj pierwszy!</p>
               ) : (
                 <div className="space-y-2">
                   {todayMeals.map(meal => (
@@ -886,7 +880,7 @@ function GlowUpTrackerInner() {
                       <div className="flex-1">
                         <p className="font-medium">{meal.name}</p>
                         <p className="text-xs text-slate-400">
-                          {meal.protein > 0 && `${meal.protein}g biaÅ‚ka`}
+                          {meal.protein > 0 && `${meal.protein}g białka`}
                         </p>
                       </div>
                       <span className="text-green-400 font-medium">{meal.kcal} kcal</span>
@@ -894,7 +888,7 @@ function GlowUpTrackerInner() {
                         onClick={() => removeMeal(meal.id)}
                         className="text-red-400 hover:text-red-300 p-1"
                       >
-                        âœ•
+                        ✕
                       </button>
                     </div>
                   ))}
@@ -916,7 +910,7 @@ function GlowUpTrackerInner() {
                   </div>
                   <div className="text-right">
                     <p className="text-2xl font-bold">{totalKcal} kcal</p>
-                    <p className="text-sm text-slate-400">{totalProtein}g biaÅ‚ka</p>
+                    <p className="text-sm text-slate-400">{totalProtein}g białka</p>
                   </div>
                 </div>
                 
@@ -960,7 +954,7 @@ function GlowUpTrackerInner() {
 
             {/* 30-day heatmap with dates */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
-              <h3 className="font-semibold mb-3">ðŸ“Š Ostatnie 30 dni</h3>
+              <h3 className="font-semibold mb-3">📊 Ostatnie 30 dni</h3>
               <div className="grid grid-cols-7 gap-1">
                 {/* Day headers */}
                 {['Pn', 'Wt', 'Åšr', 'Cz', 'Pt', 'Sb', 'Nd'].map(day => (
@@ -1028,7 +1022,7 @@ function GlowUpTrackerInner() {
 
             {/* Weekly breakdown */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
-              <h3 className="font-semibold mb-2">ðŸ“… Ten tydzieÅ„</h3>
+              <h3 className="font-semibold mb-2">📅 Ten tydzień</h3>
               <p className="text-xs text-slate-400 mb-3">
                 {new Date(getWeekDates()[0]).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long' })} - {new Date(getWeekDates()[6]).toLocaleDateString('pl-PL', { day: 'numeric', month: 'long', year: 'numeric' })}
               </p>
@@ -1065,12 +1059,12 @@ function GlowUpTrackerInner() {
                                 }`}
                                 title={task.label}
                               >
-                                {dayTasks[task.key] ? 'âœ“' : ''}
+                                {dayTasks[task.key] ? '✔' : ''}
                               </div>
                             ))}
                           </div>
                           <p className="text-xs text-slate-400">
-                            {DAILY_TASKS.filter(t => dayTasks[t.key]).length}/{DAILY_TASKS.length} zadaÅ„
+                            {DAILY_TASKS.filter(t => dayTasks[t.key]).length}/{DAILY_TASKS.length} zadań
                           </p>
                         </div>
                         <div className="text-right">
@@ -1090,7 +1084,7 @@ function GlowUpTrackerInner() {
 
             {/* Weight history */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
-              <h3 className="font-semibold mb-3">âš–ï¸ Historia wagi</h3>
+              <h3 className="font-semibold mb-3">⚖️ Historia wagi</h3>
               {Object.keys(state.weightHistory).length === 0 ? (
                 <p className="text-slate-500 text-center py-4">
                   Brak zapisanej historii wagi
@@ -1115,7 +1109,7 @@ function GlowUpTrackerInner() {
 
             {/* Stats */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
-              <h3 className="font-semibold mb-3">ðŸ“ˆ Statystyki</h3>
+              <h3 className="font-semibold mb-3">📈 Statystyki</h3>
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-slate-700/30 p-3 rounded-xl text-center">
                   <p className="text-2xl font-bold text-green-400">
@@ -1135,7 +1129,7 @@ function GlowUpTrackerInner() {
                   <p className="text-2xl font-bold text-purple-400">
                     {Object.keys(state.dailyHistory || {}).length}
                   </p>
-                  <p className="text-xs text-slate-400">Dni Å›ledzenia</p>
+                  <p className="text-xs text-slate-400">Dni śledzenia</p>
                 </div>
                 <div className="bg-slate-700/30 p-3 rounded-xl text-center">
                   <p className="text-2xl font-bold text-pink-400">
@@ -1160,7 +1154,7 @@ function GlowUpTrackerInner() {
             
             {/* Weight Tracking */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
-              <h3 className="font-semibold mb-3">âš–ï¸ Waga - TydzieÅ„ {weekNumber}</h3>
+              <h3 className="font-semibold mb-3">⚖️ Waga - Tydzień {weekNumber}</h3>
               
               <div className="flex items-center gap-3 mb-4">
                 <button
@@ -1230,15 +1224,15 @@ function GlowUpTrackerInner() {
                 return (
                   <div className="space-y-2">
                     <div className={`flex justify-between p-3 rounded-xl ${isOnTrack ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
-                      <span>Cel na tydzieÅ„ {weekNumber}:</span>
+                      <span>Cel na tydzień {weekNumber}:</span>
                       <span className="font-bold">{currentTarget.toFixed(1)} kg</span>
                     </div>
                     <div className={`flex justify-between p-3 rounded-xl ${isOnTrack ? 'bg-green-500/20' : 'bg-red-500/20'}`}>
                       <span className="text-slate-300">Status:</span>
                       <span className={`font-bold ${isOnTrack ? 'text-green-400' : 'text-red-400'}`}>
                         {isOnTrack 
-                          ? `âœ“ ${Math.abs(diff).toFixed(1)} kg przed planem!` 
-                          : `âœ— ${diff.toFixed(1)} kg powyÅ¼ej celu`
+                          ? `✔ ${Math.abs(diff).toFixed(1)} kg przed planem!` 
+                          : `✗ ${diff.toFixed(1)} kg powyżej celu`
                         }
                       </span>
                     </div>
@@ -1249,7 +1243,7 @@ function GlowUpTrackerInner() {
 
             {/* Daily targets to reach goal */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
-              <h3 className="font-semibold mb-3">ðŸŽ¯ Co musisz robiÄ‡ codziennie</h3>
+              <h3 className="font-semibold mb-3">🎯 Co musisz robić codziennie</h3>
               
               {(() => {
                 const start = state.weightGoal?.start || 72;
@@ -1264,7 +1258,7 @@ function GlowUpTrackerInner() {
                   <div className="space-y-3">
                     <div className="p-3 bg-slate-700/30 rounded-xl">
                       <div className="flex justify-between mb-1">
-                        <span className="text-slate-400">ZostaÅ‚o do celu:</span>
+                        <span className="text-slate-400">Zostało do celu:</span>
                         <span className="font-bold text-pink-400">{remaining.toFixed(1)} kg</span>
                       </div>
                       <div className="flex justify-between">
@@ -1274,22 +1268,22 @@ function GlowUpTrackerInner() {
                     </div>
                     
                     <div className="p-3 bg-purple-500/20 rounded-xl">
-                      <p className="text-sm text-slate-400 mb-2">Å»eby osiÄ…gnÄ…Ä‡ cel, codziennie:</p>
+                      <p className="text-sm text-slate-400 mb-2">Żeby osiągnąć cel, codziennie:</p>
                       <div className="space-y-2">
                         <div className="flex items-center gap-2">
-                          <span className="text-xl">ðŸ”¥</span>
-                          <span>Deficyt kaloryczny: <strong className="text-yellow-400">~{kcalDeficit} kcal/dzieÅ„</strong></span>
+                          <span className="text-xl">🔥</span>
+                          <span>Deficyt kaloryczny: <strong className="text-yellow-400">~{kcalDeficit} kcal/dzień</strong></span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xl">ðŸ½ï¸</span>
+                          <span className="text-xl">🍽️</span>
                           <span>Jedz: <strong className="text-green-400">1400-1500 kcal</strong></span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xl">ðŸƒ</span>
-                          <span>Ä†wicz: <strong className="text-blue-400">20 min dziennie</strong></span>
+                          <span className="text-xl">🏃</span>
+                          <span>Ćwicz: <strong className="text-blue-400">20 min dziennie</strong></span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span className="text-xl">ðŸ’§</span>
+                          <span className="text-xl">💧</span>
                           <span>Pij: <strong>min. 2L wody</strong></span>
                         </div>
                       </div>
@@ -1297,7 +1291,7 @@ function GlowUpTrackerInner() {
 
                     <div className="p-3 bg-slate-700/30 rounded-xl text-center">
                       <p className="text-sm text-slate-400">Tempo utraty wagi:</p>
-                      <p className="text-2xl font-bold text-pink-400">{(perDay * 7).toFixed(2)} kg/tydzieÅ„</p>
+                      <p className="text-2xl font-bold text-pink-400">{(perDay * 7).toFixed(2)} kg/tydzień</p>
                       <p className="text-xs text-slate-500">({(perDay * 1000).toFixed(0)}g dziennie)</p>
                     </div>
                   </div>
@@ -1307,14 +1301,14 @@ function GlowUpTrackerInner() {
 
             {/* Today's progress */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
-              <h3 className="font-semibold mb-3">ðŸ“Š Dzisiejszy postÄ™p</h3>
+              <h3 className="font-semibold mb-3">📊 Dzisiejszy postęp</h3>
               
               <div className="space-y-3">
                 {/* Habits */}
                 <div className="flex items-center justify-between p-3 bg-slate-700/30 rounded-xl">
                   <div className="flex items-center gap-2">
-                    <span>âœ…</span>
-                    <span>StaÅ‚e nawyki</span>
+                    <span>✅</span>
+                    <span>Stałe nawyki</span>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className={dailyCompleted === DAILY_TASKS.length ? 'text-green-400' : 'text-slate-400'}>
@@ -1333,7 +1327,7 @@ function GlowUpTrackerInner() {
                 {getTodaySchedule().length > 0 && (
                   <div className="flex items-center justify-between p-3 bg-slate-700/30 rounded-xl">
                     <div className="flex items-center gap-2">
-                      <span>ðŸ“…</span>
+                      <span>📅</span>
                       <span>Plan dnia</span>
                     </div>
                     <div className="flex items-center gap-2">
@@ -1353,7 +1347,7 @@ function GlowUpTrackerInner() {
                 {/* Calories */}
                 <div className="flex items-center justify-between p-3 bg-slate-700/30 rounded-xl">
                   <div className="flex items-center gap-2">
-                    <span>ðŸ½ï¸</span>
+                    <span>🍽️</span>
                     <span>Kalorie</span>
                   </div>
                   <div className="flex items-center gap-2">
@@ -1376,11 +1370,11 @@ function GlowUpTrackerInner() {
 
             {/* Weekly summary */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
-              <h3 className="font-semibold mb-3">ðŸ“ˆ Podsumowanie tygodnia</h3>
+              <h3 className="font-semibold mb-3">📈 Podsumowanie tygodnia</h3>
               
               <div className="grid grid-cols-2 gap-3">
                 <div className="bg-slate-700/30 p-3 rounded-xl text-center">
-                  <p className="text-xs text-slate-400">Dni z Ä‡wiczeniami</p>
+                  <p className="text-xs text-slate-400">Dni z ćwiczeniami</p>
                   <p className="text-2xl font-bold text-green-400">
                     {getWeekDates().filter(date => state.dailyHistory?.[date]?.exercise).length}/7
                   </p>
@@ -1426,14 +1420,14 @@ function GlowUpTrackerInner() {
             
             {/* My Goals */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
-              <h3 className="font-semibold mb-3">ðŸŽ¯ Moje cele</h3>
+              <h3 className="font-semibold mb-3">🎯 Moje cele</h3>
               <textarea
                 value={state.notes?.goals || ''}
                 onChange={(e) => saveState({
                   ...state,
                   notes: { ...state.notes, goals: e.target.value }
                 })}
-                placeholder="Wpisz swoje cele na te 3 miesiÄ…ce...&#10;&#10;Np:&#10;â€¢ ZnaleÅºÄ‡ pracÄ™ jako Frontend Developer&#10;â€¢ SchudnÄ…Ä‡ do 60kg&#10;â€¢ ZdaÄ‡ egzamin B2"
+                placeholder="Wpisz swoje cele na te 3 miesiące...&#10;&#10;Np:&#10;• Znaleźć pracę jako Frontend Developer&#10;• Schudnąć do 60kg&#10;• Zdać egzamin B2"
                 className="w-full bg-slate-700/50 rounded-xl px-4 py-3 min-h-32 placeholder-slate-500 resize-none"
               />
             </div>
@@ -1441,7 +1435,7 @@ function GlowUpTrackerInner() {
             {/* Weekly Plan */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
               <div className="flex justify-between items-center mb-3">
-                <h3 className="font-semibold">ðŸ“ Plan na tydzieÅ„ {weekNumber}</h3>
+                <h3 className="font-semibold">📝 Plan na tydzień {weekNumber}</h3>
               </div>
               <textarea
                 value={state.notes?.weeklyPlans?.[weekNumber] || ''}
@@ -1455,7 +1449,7 @@ function GlowUpTrackerInner() {
                     }
                   }
                 })}
-                placeholder={`Co chcesz osiÄ…gnÄ…Ä‡ w tym tygodniu?&#10;&#10;Np:&#10;â€¢ SkoÅ„czyÄ‡ moduÅ‚ React Hooks&#10;â€¢ NauczyÄ‡ siÄ™ 100 nowych sÅ‚Ã³wek&#10;â€¢ Ä†wiczyÄ‡ codziennie`}
+                placeholder={`Co chcesz osiągnąć w tym tygodniu?&#10;&#10;Np:&#10;• Skończyć moduł React Hooks&#10;• Nauczyć się 100 nowych słówek&#10;• Ćwiczyć codziennie`}
                 className="w-full bg-slate-700/50 rounded-xl px-4 py-3 min-h-28 placeholder-slate-500 resize-none"
               />
             </div>
@@ -1463,7 +1457,7 @@ function GlowUpTrackerInner() {
             {/* Daily Notes */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
               <div className="flex justify-between items-center mb-3">
-                <h3 className="font-semibold">ðŸ““ Notatki na dziÅ›</h3>
+                <h3 className="font-semibold">📔 Notatki na dziś</h3>
                 <span className="text-xs text-slate-400">
                   {new Date().toLocaleDateString('pl-PL', { day: 'numeric', month: 'short' })}
                 </span>
@@ -1480,28 +1474,28 @@ function GlowUpTrackerInner() {
                     }
                   }
                 })}
-                placeholder="Zapisz przemyÅ›lenia, postÄ™py, co siÄ™ udaÅ‚o, co byÅ‚o trudne..."
+                placeholder="Zapisz przemyślenia, postępy, co się udało, co było trudne..."
                 className="w-full bg-slate-700/50 rounded-xl px-4 py-3 min-h-24 placeholder-slate-500 resize-none"
               />
             </div>
 
             {/* Ideas / Projects */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
-              <h3 className="font-semibold mb-3">ðŸ’¡ PomysÅ‚y na projekty</h3>
+              <h3 className="font-semibold mb-3">💡 Pomysły na projekty</h3>
               <textarea
                 value={state.notes?.projectIdeas || ''}
                 onChange={(e) => saveState({
                   ...state,
                   notes: { ...state.notes, projectIdeas: e.target.value }
                 })}
-                placeholder="Zapisuj pomysÅ‚y na projekty do portfolio...&#10;&#10;Np:&#10;â€¢ Dashboard do Å›ledzenia finansÃ³w&#10;â€¢ Aplikacja do nauki sÅ‚Ã³wek&#10;â€¢ Clone Twittera"
+                placeholder="Zapisuj pomysły na projekty do portfolio...&#10;&#10;Np:&#10;• Dashboard do śledzenia finansów&#10;• Aplikacja do nauki słówek&#10;• Clone Twittera"
                 className="w-full bg-slate-700/50 rounded-xl px-4 py-3 min-h-28 placeholder-slate-500 resize-none"
               />
             </div>
 
             {/* Weight Calculator */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
-              <h3 className="font-semibold mb-3">âš–ï¸ Kalkulator wagi</h3>
+              <h3 className="font-semibold mb-3">⚖️ Kalkulator wagi</h3>
               <div className="grid grid-cols-2 gap-3 mb-3">
                 <div className="bg-slate-700/30 p-3 rounded-xl">
                   <p className="text-xs text-slate-400">Waga startowa</p>
@@ -1544,25 +1538,25 @@ function GlowUpTrackerInner() {
                 return (
                   <div className="space-y-2">
                     <div className="flex justify-between p-2 bg-slate-700/30 rounded-lg">
-                      <span className="text-slate-400">Do zrzucenia Å‚Ä…cznie:</span>
+                      <span className="text-slate-400">Do zrzucenia łącznie:</span>
                       <span className="font-bold">{toLoose.toFixed(1)} kg</span>
                     </div>
                     <div className="flex justify-between p-2 bg-slate-700/30 rounded-lg">
-                      <span className="text-slate-400">Plan na tydzieÅ„:</span>
+                      <span className="text-slate-400">Plan na tydzień:</span>
                       <span className="font-bold text-yellow-400">{perWeek.toFixed(2)} kg/tydz</span>
                     </div>
                     <div className="flex justify-between p-2 bg-slate-700/30 rounded-lg">
-                      <span className="text-slate-400">Cel na tydzieÅ„ {weekNumber}:</span>
+                      <span className="text-slate-400">Cel na tydzień {weekNumber}:</span>
                       <span className="font-bold">{currentTarget.toFixed(1)} kg</span>
                     </div>
                     <div className={`flex justify-between p-2 rounded-lg ${
                       state.currentWeight <= currentTarget ? 'bg-green-500/20' : 'bg-red-500/20'
                     }`}>
                       <span className="text-slate-400">Aktualna waga:</span>
-                      <span className="font-bold">{state.currentWeight} kg {state.currentWeight <= currentTarget ? 'âœ“' : `(+${(state.currentWeight - currentTarget).toFixed(1)})`}</span>
+                      <span className="font-bold">{state.currentWeight} kg {state.currentWeight <= currentTarget ? '✔' : `(+${(state.currentWeight - currentTarget).toFixed(1)})`}</span>
                     </div>
                     <div className="flex justify-between p-2 bg-purple-500/20 rounded-lg">
-                      <span className="text-slate-400">ZostaÅ‚o do celu:</span>
+                      <span className="text-slate-400">Zostało do celu:</span>
                       <span className="font-bold">{remaining.toFixed(1)} kg ({perWeekRemaining.toFixed(2)} kg/tydz przez {weeksLeft} tyg)</span>
                     </div>
                   </div>
@@ -1573,7 +1567,7 @@ function GlowUpTrackerInner() {
             {/* Skills to learn - editable */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
               <div className="flex justify-between items-center mb-3">
-                <h3 className="font-semibold">ðŸ’» Tematy do nauki (Mid Developer)</h3>
+                <h3 className="font-semibold">💻 Tematy do nauki (Mid Developer)</h3>
               </div>
               
               {/* Add new skill */}
@@ -1609,7 +1603,7 @@ function GlowUpTrackerInner() {
                         skill.done ? 'bg-green-500 border-green-500' : 'border-slate-500'
                       }`}
                     >
-                      {skill.done && 'âœ“'}
+                      {skill.done && '✔'}
                     </button>
                     <span className={`flex-1 text-sm ${skill.done ? 'line-through text-slate-400' : ''}`}>
                       {skill.name}
@@ -1627,21 +1621,21 @@ function GlowUpTrackerInner() {
                       onClick={() => removeSkill(index)}
                       className="text-slate-500 hover:text-red-400 text-sm"
                     >
-                      âœ•
+                      ✕
                     </button>
                   </div>
                 ))}
               </div>
 
               <div className="mt-3 text-sm text-slate-400 text-center">
-                {(state.skills || defaultSkills).filter(s => s.done).length} / {(state.skills || defaultSkills).length} ukoÅ„czone
+                {(state.skills || defaultSkills).filter(s => s.done).length} / {(state.skills || defaultSkills).length} ukończone
               </div>
             </div>
 
             {/* Projects to build - editable */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
               <div className="flex justify-between items-center mb-3">
-                <h3 className="font-semibold">ðŸš€ Projekty do portfolio</h3>
+                <h3 className="font-semibold">🚀 Projekty do portfolio</h3>
               </div>
               
               {/* Add new project */}
@@ -1683,9 +1677,9 @@ function GlowUpTrackerInner() {
                           'text-slate-400'
                         }`}
                       >
-                        <option value="todo">ðŸ“‹ Do zrobienia</option>
-                        <option value="inprogress">ðŸ”¨ W trakcie</option>
-                        <option value="done">âœ… Gotowe</option>
+                        <option value="todo">📋 Do zrobienia</option>
+                        <option value="inprogress">🔨 W trakcie</option>
+                        <option value="done">✅ Gotowe</option>
                       </select>
                       <span className={`flex-1 font-medium ${project.status === 'done' ? 'line-through text-slate-400' : ''}`}>
                         {project.name}
@@ -1694,7 +1688,7 @@ function GlowUpTrackerInner() {
                         onClick={() => removeProject(index)}
                         className="text-slate-500 hover:text-red-400"
                       >
-                        âœ•
+                        ✕
                       </button>
                     </div>
                     {project.description && (
@@ -1712,16 +1706,16 @@ function GlowUpTrackerInner() {
               </div>
 
               <div className="mt-3 flex justify-between text-sm text-slate-400">
-                <span>ðŸ“‹ {(state.projects || defaultProjects).filter(p => p.status === 'todo').length} do zrobienia</span>
-                <span>ðŸ”¨ {(state.projects || defaultProjects).filter(p => p.status === 'inprogress').length} w trakcie</span>
-                <span>âœ… {(state.projects || defaultProjects).filter(p => p.status === 'done').length} gotowe</span>
+                <span>📋 {(state.projects || defaultProjects).filter(p => p.status === 'todo').length} do zrobienia</span>
+                <span>🔨 {(state.projects || defaultProjects).filter(p => p.status === 'inprogress').length} w trakcie</span>
+                <span>✅ {(state.projects || defaultProjects).filter(p => p.status === 'done').length} gotowe</span>
               </div>
             </div>
 
             {/* English B2 Topics */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
               <div className="flex justify-between items-center mb-3">
-                <h3 className="font-semibold">ðŸ‡¬ðŸ‡§ Tematy B2 do opanowania</h3>
+                <h3 className="font-semibold">🇬🇧 Tematy B2 do opanowania</h3>
               </div>
               
               <div className="flex gap-2 mb-3">
@@ -1756,7 +1750,7 @@ function GlowUpTrackerInner() {
                         topic.done ? 'bg-green-500 border-green-500' : 'border-slate-500'
                       }`}
                     >
-                      {topic.done && 'âœ“'}
+                      {topic.done && '✔'}
                     </button>
                     <span className={`flex-1 text-sm ${topic.done ? 'line-through text-slate-400' : ''}`}>
                       {topic.name}
@@ -1765,14 +1759,14 @@ function GlowUpTrackerInner() {
                       onClick={() => removeEnglishTopic(index)}
                       className="text-slate-500 hover:text-red-400 text-sm"
                     >
-                      âœ•
+                      ✕
                     </button>
                   </div>
                 ))}
               </div>
 
               <div className="mt-3 text-sm text-slate-400 text-center">
-                {(state.englishTopics || defaultEnglishTopics).filter(t => t.done).length} / {(state.englishTopics || defaultEnglishTopics).length} ukoÅ„czone
+                {(state.englishTopics || defaultEnglishTopics).filter(t => t.done).length} / {(state.englishTopics || defaultEnglishTopics).length} ukończone
               </div>
             </div>
           </div>
@@ -1794,11 +1788,11 @@ function GlowUpTrackerInner() {
 
             {/* Add new task */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
-              <h3 className="font-semibold mb-3">âž• Dodaj zadanie</h3>
+              <h3 className="font-semibold mb-3">➕ Dodaj zadanie</h3>
               <div className="space-y-3">
                 <input
                   type="text"
-                  placeholder="Co chcesz zrobiÄ‡? (np. Kurs React)"
+                  placeholder="Co chcesz zrobić? (np. Kurs React)"
                   value={newScheduleTask.name}
                   onChange={(e) => setNewScheduleTask({ ...newScheduleTask, name: e.target.value })}
                   className="w-full bg-slate-700 rounded-xl px-4 py-3 placeholder-slate-500"
@@ -1829,10 +1823,10 @@ function GlowUpTrackerInner() {
                       onChange={(e) => setNewScheduleTask({ ...newScheduleTask, category: e.target.value })}
                       className="w-full bg-slate-700 rounded-xl px-3 py-2"
                     >
-                      <option value="frontend">ðŸ’» Frontend</option>
-                      <option value="english">ðŸ‡¬ðŸ‡§ Angielski</option>
-                      <option value="exercise">ðŸƒ Ä†wiczenia</option>
-                      <option value="other">ðŸ“Œ Inne</option>
+                      <option value="frontend">💻 Frontend</option>
+                      <option value="english">🇬🇧 Angielski</option>
+                      <option value="exercise">🏃 Ćwiczenia</option>
+                      <option value="other">📌 Inne</option>
                     </select>
                   </div>
                 </div>
@@ -1848,14 +1842,14 @@ function GlowUpTrackerInner() {
 
             {/* Quick add templates */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
-              <h3 className="font-semibold mb-3">âš¡ Szybkie dodawanie</h3>
+              <h3 className="font-semibold mb-3">⚡ Szybkie dodawanie</h3>
               <div className="flex flex-wrap gap-2">
                 {[
-                  { name: 'Ä†wiczenia', startTime: '17:00', endTime: '17:20', category: 'exercise' },
+                  { name: 'Ćwiczenia', startTime: '17:00', endTime: '17:20', category: 'exercise' },
                   { name: 'Angielski', startTime: '17:30', endTime: '18:30', category: 'english' },
                   { name: 'Kurs/Tutorial', startTime: '18:30', endTime: '19:30', category: 'frontend' },
                   { name: 'Projekt/Portfolio', startTime: '20:00', endTime: '21:30', category: 'frontend' },
-                  { name: 'Anki sÅ‚Ã³wka', startTime: '09:00', endTime: '09:15', category: 'english' },
+                  { name: 'Anki słówka', startTime: '09:00', endTime: '09:15', category: 'english' },
                   { name: 'LeetCode', startTime: '21:30', endTime: '22:00', category: 'frontend' },
                 ].map((template, i) => (
                   <button
@@ -1882,7 +1876,7 @@ function GlowUpTrackerInner() {
             {/* Today's schedule */}
             <div className="bg-slate-800/50 rounded-2xl p-4 backdrop-blur">
               <div className="flex justify-between items-center mb-3">
-                <h3 className="font-semibold">ðŸ“… Plan na dziÅ›</h3>
+                <h3 className="font-semibold">📅 Plan na dziś</h3>
                 <span className="text-sm text-slate-400">
                   {getTodaySchedule().filter(t => t.done).length}/{getTodaySchedule().length} zrobione
                 </span>
@@ -1890,7 +1884,7 @@ function GlowUpTrackerInner() {
 
               {getTodaySchedule().length === 0 ? (
                 <p className="text-slate-500 text-center py-6">
-                  Brak zaplanowanych zadaÅ„ - dodaj pierwsze!
+                  Brak zaplanowanych zadań - dodaj pierwsze!
                 </p>
               ) : (
                 <div className="space-y-2">
@@ -1902,10 +1896,10 @@ function GlowUpTrackerInner() {
                       other: 'border-slate-500 bg-slate-500/10'
                     };
                     const categoryIcons = {
-                      frontend: 'ðŸ’»',
-                      english: 'ðŸ‡¬ðŸ‡§',
-                      exercise: 'ðŸƒ',
-                      other: 'ðŸ“Œ'
+                      frontend: '💻',
+                      english: '🇬🇧',
+                      exercise: '🏃',
+                      other: '📌'
                     };
                     
                     return (
@@ -1923,7 +1917,7 @@ function GlowUpTrackerInner() {
                               : 'border-slate-400 hover:border-green-400'
                           }`}
                         >
-                          {task.done && <span className="text-xs">âœ“</span>}
+                          {task.done && <span className="text-xs">✔</span>}
                         </button>
                         
                         <div className="flex-1 min-w-0">
@@ -1939,7 +1933,7 @@ function GlowUpTrackerInner() {
                           onClick={() => removeScheduleTask(task.id)}
                           className="text-slate-500 hover:text-red-400 p-1 flex-shrink-0"
                         >
-                          âœ•
+                          ✕
                         </button>
                       </div>
                     );
@@ -1967,7 +1961,7 @@ function GlowUpTrackerInner() {
                 }}
                 className="w-full bg-slate-700/50 hover:bg-slate-700 py-3 rounded-xl text-sm transition-all"
               >
-                ðŸ“‹ Skopiuj plan z wczoraj ({getYesterdaySchedule().length} zadaÅ„)
+                📋 Skopiuj plan z wczoraj ({getYesterdaySchedule().length} zadań)
               </button>
             )}
           </div>
@@ -1978,7 +1972,7 @@ function GlowUpTrackerInner() {
           onClick={() => setShowMotivation(!showMotivation)}
           className="w-full mt-4 py-2 text-slate-400 text-sm hover:text-white transition-colors"
         >
-          {showMotivation ? 'âœ¨ Schowaj motywacjÄ™' : 'âœ¨ PotrzebujÄ™ motywacji'}
+          {showMotivation ? '✨ Schowaj motywację' : '✨ Potrzebuję motywacji'}
         </button>
 
         {showMotivation && (
@@ -1994,7 +1988,7 @@ function GlowUpTrackerInner() {
           onClick={resetAll}
           className="w-full mt-4 py-2 text-slate-500 text-xs hover:text-red-400 transition-colors bg-slate-800/30 rounded-xl"
         >
-          ðŸ—‘ï¸ Resetuj wszystko
+          🗑️ Resetuj wszystko
         </button>
       </div>
     </div>
