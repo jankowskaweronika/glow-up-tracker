@@ -6,6 +6,7 @@ import './utils';
 // Hooks
 import { useAppState } from './hooks/useAppState';
 import { useCalculations } from './hooks/useCalculations';
+import { useAuth } from './hooks/useAuth';
 
 // UI Components
 import { Notification } from './components/ui/Notification';
@@ -25,7 +26,10 @@ import { HistoryTab } from './components/tabs/HistoryTab';
 import { WeekTab } from './components/tabs/WeekTab';
 import { PlanTab } from './components/tabs/PlanTab';
 
-function GlowUpTrackerInner() {
+// Auth
+import { LoginForm } from './components/LoginForm';
+
+function GlowUpTrackerInner({ onLogout }) {
   const [activeTab, setActiveTab] = useState('today');
 
   // Main state hook
@@ -183,17 +187,27 @@ function GlowUpTrackerInner() {
         )}
 
         {/* Footer */}
-        <Footer onReset={resetAll} />
+        <Footer onReset={resetAll} onLogout={onLogout} />
       </div>
     </div>
   );
 }
 
-// Export with ErrorBoundary wrapper
+// Export with ErrorBoundary wrapper and Auth gate
 export default function GlowUpTracker() {
+  const { isAuthenticated, isChecking, error, login, logout } = useAuth();
+
+  if (isChecking) {
+    return <LoadingScreen />;
+  }
+
+  if (!isAuthenticated) {
+    return <LoginForm onLogin={login} error={error} />;
+  }
+
   return (
     <ErrorBoundary>
-      <GlowUpTrackerInner />
+      <GlowUpTrackerInner onLogout={logout} />
     </ErrorBoundary>
   );
 }

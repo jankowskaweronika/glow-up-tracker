@@ -24,9 +24,9 @@ export function useAppState() {
   useEffect(() => {
     const loadData = async () => {
       try {
-        const saved = await window.storage?.get('glow-up-tracker-v2');
-        if (saved?.value) {
-          const parsed = JSON.parse(saved.value);
+        const res = await fetch('/api/data', { credentials: 'include' });
+        if (res.ok) {
+          const parsed = await res.json();
           if (parsed && typeof parsed === 'object') {
             setState(prev => ({
               ...prev,
@@ -60,7 +60,13 @@ export function useAppState() {
     setSaveStatus('saving');
 
     try {
-      await window.storage?.set('glow-up-tracker-v2', JSON.stringify(newState));
+      const res = await fetch('/api/data', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify(newState),
+      });
+      if (!res.ok) throw new Error('Save failed');
       setSaveStatus('saved');
     } catch (e) {
       console.error('Failed to save:', e);
