@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { motivationalQuotes } from '../../constants';
 
-export function Footer({ onReset }) {
+export function Footer({ onReset, onLogout }) {
   const [showMotivation, setShowMotivation] = useState(false);
 
   const randomQuote = motivationalQuotes[Math.floor(Math.random() * motivationalQuotes.length)];
@@ -29,6 +29,16 @@ export function Footer({ onReset }) {
       >
         🗑️ Resetuj wszystko
       </button>
+
+      {/* Logout Button */}
+      {onLogout && (
+        <button
+          onClick={onLogout}
+          className="w-full mt-2 py-2 text-slate-500 text-xs hover:text-yellow-400 transition-colors bg-slate-800/30 rounded-xl"
+        >
+          🚪 Wyloguj się
+        </button>
+      )}
     </>
   );
 }
