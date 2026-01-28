@@ -1,12 +1,19 @@
+import { UserMenu } from '../auth';
+
 export function Header({ saveStatus, weekNumber, phase, currentWeight, weightLost, weightProgress }) {
   return (
     <>
       {/* Title Header */}
-      <div className="text-center mb-6">
+      <div className="text-center mb-6 relative">
+        {/* User Menu - pozycja absolutna w prawym górnym rogu */}
+        <div className="absolute right-0 top-0">
+          <UserMenu />
+        </div>
+
         <h1 className="text-3xl font-bold bg-gradient-to-r from-pink-400 via-purple-400 to-blue-400 bg-clip-text text-transparent">
-          ✨ 3-Month Glow Up ✨
+          3-Month Glow Up
         </h1>
-        <p className="text-slate-400 mt-1">Frontend • English B2 • Fitness</p>
+        <p className="text-slate-400 mt-1">Frontend - English B2 - Fitness</p>
 
         {/* Save status indicator */}
         <div className="flex justify-center items-center gap-2 mt-2">
@@ -18,7 +25,7 @@ export function Header({ saveStatus, weekNumber, phase, currentWeight, weightLos
           <span className="text-xs text-slate-500">
             {saveStatus === 'saved' ? 'Zapisano' :
              saveStatus === 'saving' ? 'Zapisywanie...' :
-             'Błąd zapisu'}
+             'Blad zapisu'}
           </span>
         </div>
       </div>
@@ -30,7 +37,7 @@ export function Header({ saveStatus, weekNumber, phase, currentWeight, weightLos
             <span className={`${phase.color} text-xs px-2 py-1 rounded-full`}>
               {phase.name}
             </span>
-            <h2 className="text-xl font-semibold mt-1">Tydzień {weekNumber}/12</h2>
+            <h2 className="text-xl font-semibold mt-1">Tydzien {weekNumber}/12</h2>
           </div>
           <div className="text-right">
             <p className="text-2xl font-bold">{currentWeight} kg</p>

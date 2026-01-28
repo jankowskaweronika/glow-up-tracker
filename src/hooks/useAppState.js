@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { initialState, defaultSkills, defaultProjects, defaultEnglishTopics } from '../constants';
 import { getTodayKey, getYesterdayKey, safeParseFloat, safeParseInt } from '../utils';
+import { useSupabaseSync } from './useSupabaseSync';
 
 export function useAppState() {
   const [state, setState] = useState(initialState);
@@ -10,6 +11,29 @@ export function useAppState() {
 
   const todayKey = getTodayKey();
   const yesterdayKey = getYesterdayKey();
+
+  // Supabase sync
+  const {
+    shouldUseSupabase,
+    loadFromSupabase,
+    saveWeight,
+    saveDailyTask,
+    addMealToDb,
+    removeMealFromDb,
+    addScheduleTaskToDb,
+    updateScheduleTaskInDb,
+    removeScheduleTaskFromDb,
+    copyScheduleToDb,
+    saveSkillToDb,
+    removeSkillFromDb,
+    saveProjectToDb,
+    removeProjectFromDb,
+    saveEnglishTopicToDb,
+    removeEnglishTopicFromDb,
+    saveNoteToDb,
+    saveWeightGoalToDb,
+    resetUserData,
+  } = useSupabaseSync();
 
   // Notification handlers
   const showNotification = useCallback((message, type = 'info') => {
@@ -23,10 +47,22 @@ export function useAppState() {
   // Load data on mount
   useEffect(() => {
     const loadData = async () => {
+      setIsLoading(true);
       try {
-        const res = await fetch('/api/data', { credentials: 'include' });
-        if (res.ok) {
-          const parsed = await res.json();
+        // Próbuj załadować z Supabase jeśli dostępne
+        if (shouldUseSupabase) {
+          const supabaseData = await loadFromSupabase();
+          if (supabaseData) {
+            setState(supabaseData);
+            setIsLoading(false);
+            return;
+          }
+        }
+
+        // Fallback do localStorage
+        const saved = await window.storage?.get('glow-up-tracker-v2');
+        if (saved?.value) {
+          const parsed = JSON.parse(saved.value);
           if (parsed && typeof parsed === 'object') {
             setState(prev => ({
               ...prev,
@@ -47,9 +83,18 @@ export function useAppState() {
       setIsLoading(false);
     };
     loadData();
-  }, [showNotification]);
+  }, [showNotification, shouldUseSupabase, loadFromSupabase]);
 
-  // Save state to storage
+  // Save state to localStorage (backup)
+  const saveToLocalStorage = async (newState) => {
+    try {
+      await window.storage?.set('glow-up-tracker-v2', JSON.stringify(newState));
+    } catch (e) {
+      console.error('Failed to save to localStorage:', e);
+    }
+  };
+
+  // Save state
   const saveState = async (newState) => {
     if (!newState || typeof newState !== 'object') {
       showNotification('Błąd: nieprawidłowe dane', 'error');
@@ -60,13 +105,8 @@ export function useAppState() {
     setSaveStatus('saving');
 
     try {
-      const res = await fetch('/api/data', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        credentials: 'include',
-        body: JSON.stringify(newState),
-      });
-      if (!res.ok) throw new Error('Save failed');
+      // Zawsze zapisz do localStorage jako backup
+      await saveToLocalStorage(newState);
       setSaveStatus('saved');
     } catch (e) {
       console.error('Failed to save:', e);
@@ -95,22 +135,35 @@ export function useAppState() {
   };
 
   // Daily tasks
-  const toggleDailyTask = (taskKey) => {
+  const toggleDailyTask = async (taskKey) => {
     const todayTasks = getTodayTasks();
-    saveState({
+    const newCompleted = !todayTasks[taskKey];
+
+    const newState = {
       ...state,
       dailyHistory: {
         ...state.dailyHistory,
         [todayKey]: {
           ...todayTasks,
-          [taskKey]: !todayTasks[taskKey]
+          [taskKey]: newCompleted
         }
       }
-    });
+    };
+
+    saveState(newState);
+
+    // Sync z Supabase
+    if (shouldUseSupabase) {
+      try {
+        await saveDailyTask(todayKey, taskKey, newCompleted);
+      } catch (e) {
+        console.error('Error syncing daily task:', e);
+      }
+    }
   };
 
   // Meals management
-  const addMeal = (newMeal) => {
+  const addMeal = async (newMeal) => {
     const name = (newMeal.name || '').trim();
     const kcal = safeParseInt(newMeal.kcal, 0);
 
@@ -124,24 +177,40 @@ export function useAppState() {
     }
 
     const todayMeals = getTodayMeals();
+    let mealId = Date.now();
+
+    // Sync z Supabase
+    if (shouldUseSupabase) {
+      try {
+        mealId = await addMealToDb(todayKey, {
+          name,
+          kcal,
+          protein: safeParseInt(newMeal.protein, 0),
+        });
+      } catch (e) {
+        console.error('Error adding meal to DB:', e);
+      }
+    }
+
     saveState({
       ...state,
       meals: {
         ...state.meals,
         [todayKey]: [...todayMeals, {
-          id: Date.now(),
+          id: mealId,
           name: name,
           kcal: kcal,
           protein: safeParseInt(newMeal.protein, 0)
         }]
       }
     });
-    showNotification('Posiłek dodany! 🍽️', 'success');
+    showNotification('Posiłek dodany!', 'success');
     return true;
   };
 
-  const removeMeal = (mealId) => {
+  const removeMeal = async (mealId) => {
     const todayMeals = getTodayMeals().filter(m => m.id !== mealId);
+
     saveState({
       ...state,
       meals: {
@@ -149,10 +218,19 @@ export function useAppState() {
         [todayKey]: todayMeals
       }
     });
+
+    // Sync z Supabase
+    if (shouldUseSupabase) {
+      try {
+        await removeMealFromDb(mealId);
+      } catch (e) {
+        console.error('Error removing meal from DB:', e);
+      }
+    }
   };
 
   // Schedule management
-  const addScheduleTask = (newTask) => {
+  const addScheduleTask = async (newTask) => {
     const name = (newTask.name || '').trim();
 
     if (!name) {
@@ -161,14 +239,26 @@ export function useAppState() {
     }
 
     const todaySchedule = getTodaySchedule();
+    let taskId = Date.now();
+
     const task = {
-      id: Date.now(),
+      id: taskId,
       name: name,
       startTime: newTask.startTime || '12:00',
       endTime: newTask.endTime || '13:00',
       category: newTask.category || 'other',
       done: false
     };
+
+    // Sync z Supabase
+    if (shouldUseSupabase) {
+      try {
+        taskId = await addScheduleTaskToDb(todayKey, task);
+        task.id = taskId;
+      } catch (e) {
+        console.error('Error adding schedule task to DB:', e);
+      }
+    }
 
     saveState({
       ...state,
@@ -178,25 +268,40 @@ export function useAppState() {
           (a.startTime || '').localeCompare(b.startTime || ''))
       }
     });
-    showNotification('Zadanie dodane! 📅', 'success');
+    showNotification('Zadanie dodane!', 'success');
     return true;
   };
 
-  const toggleScheduleTask = (taskId) => {
-    const todaySchedule = getTodaySchedule().map(t =>
-      t.id === taskId ? { ...t, done: !t.done } : t
+  const toggleScheduleTask = async (taskId) => {
+    const todaySchedule = getTodaySchedule();
+    const task = todaySchedule.find(t => t.id === taskId);
+    const newDone = task ? !task.done : false;
+
+    const updatedSchedule = todaySchedule.map(t =>
+      t.id === taskId ? { ...t, done: newDone } : t
     );
+
     saveState({
       ...state,
       schedule: {
         ...state.schedule,
-        [todayKey]: todaySchedule
+        [todayKey]: updatedSchedule
       }
     });
+
+    // Sync z Supabase
+    if (shouldUseSupabase) {
+      try {
+        await updateScheduleTaskInDb(taskId, { done: newDone });
+      } catch (e) {
+        console.error('Error toggling schedule task:', e);
+      }
+    }
   };
 
-  const removeScheduleTask = (taskId) => {
+  const removeScheduleTask = async (taskId) => {
     const todaySchedule = getTodaySchedule().filter(t => t.id !== taskId);
+
     saveState({
       ...state,
       schedule: {
@@ -204,88 +309,228 @@ export function useAppState() {
         [todayKey]: todaySchedule
       }
     });
+
+    // Sync z Supabase
+    if (shouldUseSupabase) {
+      try {
+        await removeScheduleTaskFromDb(taskId);
+      } catch (e) {
+        console.error('Error removing schedule task:', e);
+      }
+    }
   };
 
-  const copyYesterdaySchedule = () => {
-    const yesterdayTasks = getYesterdaySchedule().map(t => ({
+  const copyYesterdaySchedule = async () => {
+    const yesterdayTasks = getYesterdaySchedule();
+
+    if (yesterdayTasks.length === 0) {
+      showNotification('Brak zadań z wczoraj do skopiowania', 'warning');
+      return;
+    }
+
+    let newTasks = yesterdayTasks.map(t => ({
       ...t,
       id: Date.now() + Math.random(),
       done: false
     }));
+
+    // Sync z Supabase
+    if (shouldUseSupabase) {
+      try {
+        const dbTasks = await copyScheduleToDb(yesterdayKey, todayKey, yesterdayTasks);
+        if (dbTasks.length > 0) {
+          newTasks = dbTasks.map(t => ({
+            id: t.id,
+            name: t.name,
+            startTime: t.start_time?.substring(0, 5),
+            endTime: t.end_time?.substring(0, 5),
+            category: t.category,
+            done: t.done,
+          }));
+        }
+      } catch (e) {
+        console.error('Error copying schedule:', e);
+      }
+    }
+
     saveState({
       ...state,
       schedule: {
         ...state.schedule,
-        [todayKey]: yesterdayTasks
+        [todayKey]: newTasks
       }
     });
+
+    showNotification('Skopiowano harmonogram z wczoraj!', 'success');
   };
 
   // Skills management
-  const addSkill = (skillName) => {
+  const addSkill = async (skillName) => {
     if (!skillName) return;
     const skills = state.skills || defaultSkills;
+    const newSkill = { name: skillName, category: 'other', done: false };
+
+    // Sync z Supabase
+    if (shouldUseSupabase) {
+      try {
+        const id = await saveSkillToDb(newSkill, skills.length);
+        newSkill.id = id;
+      } catch (e) {
+        console.error('Error adding skill:', e);
+      }
+    }
+
     saveState({
       ...state,
-      skills: [...skills, { name: skillName, category: 'other', done: false }]
+      skills: [...skills, newSkill]
     });
   };
 
-  const toggleSkill = (index) => {
+  const toggleSkill = async (index) => {
     const skills = [...(state.skills || defaultSkills)];
     skills[index] = { ...skills[index], done: !skills[index].done };
+
     saveState({ ...state, skills });
+
+    // Sync z Supabase
+    if (shouldUseSupabase && skills[index].id) {
+      try {
+        await saveSkillToDb(skills[index], index);
+      } catch (e) {
+        console.error('Error toggling skill:', e);
+      }
+    }
   };
 
-  const removeSkill = (index) => {
-    const skills = (state.skills || defaultSkills).filter((_, i) => i !== index);
-    saveState({ ...state, skills });
+  const removeSkill = async (index) => {
+    const skills = state.skills || defaultSkills;
+    const skill = skills[index];
+    const newSkills = skills.filter((_, i) => i !== index);
+
+    saveState({ ...state, skills: newSkills });
+
+    // Sync z Supabase
+    if (shouldUseSupabase && skill?.id) {
+      try {
+        await removeSkillFromDb(skill.id);
+      } catch (e) {
+        console.error('Error removing skill:', e);
+      }
+    }
   };
 
   // Projects management
-  const addProject = (projectName) => {
+  const addProject = async (projectName) => {
     if (!projectName) return;
     const projects = state.projects || defaultProjects;
+    const newProject = { name: projectName, status: 'todo', tech: [] };
+
+    // Sync z Supabase
+    if (shouldUseSupabase) {
+      try {
+        const id = await saveProjectToDb(newProject, projects.length);
+        newProject.id = id;
+      } catch (e) {
+        console.error('Error adding project:', e);
+      }
+    }
+
     saveState({
       ...state,
-      projects: [...projects, { name: projectName, status: 'todo', tech: [] }]
+      projects: [...projects, newProject]
     });
   };
 
-  const updateProjectStatus = (index, status) => {
+  const updateProjectStatus = async (index, status) => {
     const projects = [...(state.projects || defaultProjects)];
     projects[index] = { ...projects[index], status };
+
     saveState({ ...state, projects });
+
+    // Sync z Supabase
+    if (shouldUseSupabase && projects[index].id) {
+      try {
+        await saveProjectToDb(projects[index], index);
+      } catch (e) {
+        console.error('Error updating project:', e);
+      }
+    }
   };
 
-  const removeProject = (index) => {
-    const projects = (state.projects || defaultProjects).filter((_, i) => i !== index);
-    saveState({ ...state, projects });
+  const removeProject = async (index) => {
+    const projects = state.projects || defaultProjects;
+    const project = projects[index];
+    const newProjects = projects.filter((_, i) => i !== index);
+
+    saveState({ ...state, projects: newProjects });
+
+    // Sync z Supabase
+    if (shouldUseSupabase && project?.id) {
+      try {
+        await removeProjectFromDb(project.id);
+      } catch (e) {
+        console.error('Error removing project:', e);
+      }
+    }
   };
 
   // English topics management
-  const addEnglishTopic = (topicName) => {
+  const addEnglishTopic = async (topicName) => {
     if (!topicName) return;
     const topics = state.englishTopics || defaultEnglishTopics;
+    const newTopic = { name: topicName, done: false };
+
+    // Sync z Supabase
+    if (shouldUseSupabase) {
+      try {
+        const id = await saveEnglishTopicToDb(newTopic, topics.length);
+        newTopic.id = id;
+      } catch (e) {
+        console.error('Error adding english topic:', e);
+      }
+    }
+
     saveState({
       ...state,
-      englishTopics: [...topics, { name: topicName, done: false }]
+      englishTopics: [...topics, newTopic]
     });
   };
 
-  const toggleEnglishTopic = (index) => {
+  const toggleEnglishTopic = async (index) => {
     const topics = [...(state.englishTopics || defaultEnglishTopics)];
     topics[index] = { ...topics[index], done: !topics[index].done };
+
     saveState({ ...state, englishTopics: topics });
+
+    // Sync z Supabase
+    if (shouldUseSupabase && topics[index].id) {
+      try {
+        await saveEnglishTopicToDb(topics[index], index);
+      } catch (e) {
+        console.error('Error toggling english topic:', e);
+      }
+    }
   };
 
-  const removeEnglishTopic = (index) => {
-    const topics = (state.englishTopics || defaultEnglishTopics).filter((_, i) => i !== index);
-    saveState({ ...state, englishTopics: topics });
+  const removeEnglishTopic = async (index) => {
+    const topics = state.englishTopics || defaultEnglishTopics;
+    const topic = topics[index];
+    const newTopics = topics.filter((_, i) => i !== index);
+
+    saveState({ ...state, englishTopics: newTopics });
+
+    // Sync z Supabase
+    if (shouldUseSupabase && topic?.id) {
+      try {
+        await removeEnglishTopicFromDb(topic.id);
+      } catch (e) {
+        console.error('Error removing english topic:', e);
+      }
+    }
   };
 
   // Weight management
-  const updateWeight = (weight) => {
+  const updateWeight = async (weight) => {
     saveState({
       ...state,
       currentWeight: weight,
@@ -294,10 +539,19 @@ export function useAppState() {
         [todayKey]: weight
       }
     });
+
+    // Sync z Supabase
+    if (shouldUseSupabase) {
+      try {
+        await saveWeight(todayKey, weight);
+      } catch (e) {
+        console.error('Error saving weight:', e);
+      }
+    }
   };
 
   // Notes management
-  const updateNotes = (field, value) => {
+  const updateNotes = async (field, value) => {
     saveState({
       ...state,
       notes: {
@@ -305,9 +559,18 @@ export function useAppState() {
         [field]: value
       }
     });
+
+    // Sync z Supabase
+    if (shouldUseSupabase) {
+      try {
+        await saveNoteToDb(field, null, value);
+      } catch (e) {
+        console.error('Error saving note:', e);
+      }
+    }
   };
 
-  const updateWeeklyPlan = (weekKey, value) => {
+  const updateWeeklyPlan = async (weekKey, value) => {
     saveState({
       ...state,
       notes: {
@@ -318,9 +581,18 @@ export function useAppState() {
         }
       }
     });
+
+    // Sync z Supabase
+    if (shouldUseSupabase) {
+      try {
+        await saveNoteToDb('weekly', weekKey, value);
+      } catch (e) {
+        console.error('Error saving weekly plan:', e);
+      }
+    }
   };
 
-  const updateDailyNote = (dateKey, value) => {
+  const updateDailyNote = async (dateKey, value) => {
     saveState({
       ...state,
       notes: {
@@ -331,10 +603,19 @@ export function useAppState() {
         }
       }
     });
+
+    // Sync z Supabase
+    if (shouldUseSupabase) {
+      try {
+        await saveNoteToDb('daily', dateKey, value);
+      } catch (e) {
+        console.error('Error saving daily note:', e);
+      }
+    }
   };
 
   // Weight goal management
-  const updateWeightGoal = (field, value) => {
+  const updateWeightGoal = async (field, value) => {
     saveState({
       ...state,
       weightGoal: {
@@ -342,17 +623,38 @@ export function useAppState() {
         [field]: value
       }
     });
+
+    // Sync z Supabase
+    if (shouldUseSupabase) {
+      try {
+        await saveWeightGoalToDb(field, value);
+      } catch (e) {
+        console.error('Error saving weight goal:', e);
+      }
+    }
   };
 
   // Reset all data
-  const resetAll = () => {
-    const confirmed = window.confirm('⚠️ Na pewno chcesz zresetować CAŁY postęp?\n\nTo usunie:\n• Wszystkie zadania\n• Historię wagi\n• Posiłki\n• Notatki\n• Postępy w nauce\n\nTej operacji nie można cofnąć!');
+  const resetAll = async () => {
+    const confirmed = window.confirm('Na pewno chcesz zresetowac CALY postep?\n\nTo usunie:\n- Wszystkie zadania\n- Historie wagi\n- Posilki\n- Notatki\n- Postepy w nauce\n\nTej operacji nie mozna cofnac!');
 
     if (confirmed) {
-      saveState({
+      const newState = {
         ...initialState,
         startDate: getTodayKey()
-      });
+      };
+
+      saveState(newState);
+
+      // Sync z Supabase
+      if (shouldUseSupabase) {
+        try {
+          await resetUserData();
+        } catch (e) {
+          console.error('Error resetting user data:', e);
+        }
+      }
+
       showNotification('Dane zostały zresetowane', 'info');
     }
   };

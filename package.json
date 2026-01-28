@@ -12,6 +12,7 @@
     "seed": "node server/seed.js"
   },
   "dependencies": {
+    "@supabase/supabase-js": "^2.93.2",
     "@tailwindcss/vite": "^4.1.18",
     "bcryptjs": "^3.0.3",
     "connect-mongo": "^6.0.0",
