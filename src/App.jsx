@@ -4,13 +4,12 @@ import { useState } from 'react';
 import './utils';
 
 // Auth
-import { AuthProvider } from './context/AuthContext';
+import { AuthProvider, useAuth } from './context/AuthContext';
 import { ProtectedRoute } from './components/auth';
 
 // Hooks
 import { useAppState } from './hooks/useAppState';
 import { useCalculations } from './hooks/useCalculations';
-import { useAuth } from './hooks/useAuth';
 
 // UI Components
 import { Notification } from './components/ui/Notification';
@@ -30,11 +29,9 @@ import { HistoryTab } from './components/tabs/HistoryTab';
 import { WeekTab } from './components/tabs/WeekTab';
 import { PlanTab } from './components/tabs/PlanTab';
 
-// Auth
-import { LoginForm } from './components/LoginForm';
-
-function GlowUpTrackerInner({ onLogout }) {
+function GlowUpTrackerInner() {
   const [activeTab, setActiveTab] = useState('today');
+  const { signOut } = useAuth();
 
   // Main state hook
   const {
@@ -87,6 +84,14 @@ function GlowUpTrackerInner({ onLogout }) {
   const todayMeals = getTodayMeals();
   const todaySchedule = getTodaySchedule();
   const yesterdaySchedule = getYesterdaySchedule();
+
+  const handleLogout = async () => {
+    try {
+      await signOut();
+    } catch (err) {
+      showNotification('Błąd wylogowania', 'error');
+    }
+  };
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900 text-white p-4 pb-20">
@@ -191,7 +196,7 @@ function GlowUpTrackerInner({ onLogout }) {
         )}
 
         {/* Footer */}
-        <Footer onReset={resetAll} onLogout={onLogout} />
+        <Footer onReset={resetAll} onLogout={handleLogout} />
       </div>
     </div>
   );
@@ -199,16 +204,6 @@ function GlowUpTrackerInner({ onLogout }) {
 
 // Export with ErrorBoundary and AuthProvider wrapper
 export default function GlowUpTracker() {
-  const { isAuthenticated, isChecking, error, login, logout } = useAuth();
-
-  if (isChecking) {
-    return <LoadingScreen />;
-  }
-
-  if (!isAuthenticated) {
-    return <LoginForm onLogin={login} error={error} />;
-  }
-
   return (
     <ErrorBoundary>
       <AuthProvider>
