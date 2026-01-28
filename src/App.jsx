@@ -3,6 +3,10 @@ import { useState } from 'react';
 // Utils - initialize storage polyfill
 import './utils';
 
+// Auth
+import { AuthProvider } from './context/AuthContext';
+import { ProtectedRoute } from './components/auth';
+
 // Hooks
 import { useAppState } from './hooks/useAppState';
 import { useCalculations } from './hooks/useCalculations';
@@ -189,11 +193,15 @@ function GlowUpTrackerInner() {
   );
 }
 
-// Export with ErrorBoundary wrapper
+// Export with ErrorBoundary and AuthProvider wrapper
 export default function GlowUpTracker() {
   return (
     <ErrorBoundary>
-      <GlowUpTrackerInner />
+      <AuthProvider>
+        <ProtectedRoute>
+          <GlowUpTrackerInner />
+        </ProtectedRoute>
+      </AuthProvider>
     </ErrorBoundary>
   );
 }
