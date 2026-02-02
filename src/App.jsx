@@ -88,6 +88,7 @@ function GlowUpTrackerInner() {
   const handleLogout = async () => {
     try {
       await signOut();
+    // eslint-disable-next-line no-unused-vars
     } catch (err) {
       showNotification('Błąd wylogowania', 'error');
     }
